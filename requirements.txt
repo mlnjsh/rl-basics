@@ -1,0 +1,7 @@
+gym==0.23.0
+pygame
+numpy
+matplotlib
+seaborn
+torch
+tqdm
