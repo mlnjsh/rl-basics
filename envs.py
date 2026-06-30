@@ -79,7 +79,7 @@ class Maze(gym.Env):
             self.screen = pygame.Surface((screen_size, screen_size))
 
         surf = pygame.Surface((screen_size, screen_size))
-        surf.fill((22, 36, 71))                            # Dark navy background.
+        surf.fill((0, 0, 0))                               # Black background.
 
         # Draw every wall: for each square, any neighbour it is NOT connected to gets a white border drawn.
         for row in range(5):
