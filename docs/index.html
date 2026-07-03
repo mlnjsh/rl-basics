@@ -254,7 +254,7 @@ const RULES = [
   {re:/def\s+value_iteration|value_iteration\s*\(/, concept:"value_iteration", ex:()=>"Defines <b>value iteration</b>: repeatedly apply the Bellman optimality backup until values converge, then extract the greedy policy."},
   {re:/for\s+.*\bin\s+range\(\s*n_actions|max\s*\(\s*q\s*\)|best\s*=\s*max/, concept:"value_iteration", ex:()=>"Bellman optimality backup: take the <b>max over actions</b> of the expected return — the best you can do from this state."},
   {re:/sum\s*\(\s*p\s*\*|for\s+p\s*,\s*ns\s*,\s*r\s*,\s*term\s+in|for\s+prob\s*,/, concept:"value_iteration", ex:()=>"Averages over the transition model's outcomes: Σ P(s'|s,a)·[r + γ·V(s')]. This expectation is why stochastic MDPs need the full model."},
-  {re:/\bdelta\b\s*=|abs\(\s*best\s*-|theta\b/, concept:"value_iteration", ex:()=>"Convergence check: track the largest value change (<code>delta</code>) and stop when it falls below a tiny threshold <code>theta</code>."},
+  {re:/abs\(\s*best\s*-|if\s+delta\s*<\s*theta/, concept:"value_iteration", ex:()=>"Convergence check: keep sweeping until the largest value change drops below the tiny threshold <code>theta</code> (the values have converged)."},
 
   // Policy iteration & model-based lookahead (Maze DP notebooks)
   {re:/def\s+policy_iteration|def\s+policy_evaluation|def\s+policy_improvement/, concept:"policy_iteration", ex:l=>
@@ -305,6 +305,21 @@ const RULES = [
   {re:/reset\s*\(\s*seed\s*=/, concept:"environment", ex:()=>"Seeding <code>reset(seed=...)</code> fixes the environment's RNG so the episode is reproducible."},
   {re:/observation_space\.sample/, concept:"spaces", ex:()=>"Draws a random observation from the state space — handy for checking shapes/dtypes."},
   {re:/total_reward\s*\+=|ep_return\s*\+=|total_reward\s*=\s*0/, concept:"episode_loop", ex:()=>"Accumulates the episode's total reward (its return) — the basic score of a run."}
+  ,{re:/(delta|Delta)\s*=\s*float\(\s*['"]inf['"]\s*\)/, concept:"value_iteration", ex:()=>"Start <code>delta</code> at <b>infinity</b>. <code>delta</code> will hold the biggest change to any state's value in one pass — starting it huge guarantees the <code>while</code> loop below runs at least once."}
+  ,{re:/\bdelta\s*=\s*0\b/, ex:()=>"Reset <code>delta</code> to <b>0</b> at the start of each full sweep. As we update states we grow it to the largest change we see this sweep."}
+  ,{re:/while\s+delta\s*>\s*theta/, ex:()=>"Keep doing full sweeps until the biggest change in a sweep is smaller than the tiny number <code>theta</code> — i.e. the values have basically stopped changing. This is called <b>convergence</b>."}
+  ,{re:/delta\s*=\s*max\s*\(\s*delta\s*,\s*abs/, ex:()=>"Track the largest value-change seen so far this sweep. That number is what the <code>while</code> loop checks to decide when to stop."}
+  ,{re:/old_value\s*=|old_val\s*=/, ex:()=>"Save the state's value <i>before</i> we change it, so afterwards we can measure how much it moved."}
+  ,{re:/max_qsa\s*=\s*float\(\s*['"]-inf['"]\s*\)/, ex:()=>"Start the best-action score at <b>minus infinity</b>, so the very first action we test always beats it and becomes the current best."}
+  ,{re:/if\s+qsa\s*>\s*max_qsa/, ex:()=>"If this action looks better than the best one found so far, keep it. This little loop is how we find the <b>greedy</b> (best) action."}
+  ,{re:/qsa\s*=\s*reward\s*\+\s*gamma\s*\*/, concept:"td_target", ex:()=>"Compute <b>Q(s,a)</b> — how good this action is: the reward you get now, plus a discounted guess of the value of the square you land on."}
+  ,{re:/for\s+row\s+in\s+range|for\s+col\s+in\s+range/, ex:()=>"Loop over every cell of the 5×5 grid — i.e. visit every state, one at a time."}
+  ,{re:/state_values\[[^\]]+\]\s*=\s*(max_qsa|new_value)/, ex:()=>"Store the freshly computed value for this state, replacing its old value."}
+  ,{re:/new_value\s*=\s*0\b/, ex:()=>"Start this state's new value at 0; we build it up by adding each action's weighted contribution."}
+  ,{re:/done\s*=\s*False/, ex:()=>"Mark the episode as 'not finished yet'. This flag flips to True when the agent reaches the goal and the episode ends."}
+  ,{re:/state\s*,\s*action\s*=\s*next_state\s*,\s*next_action|(^|[^_\w])state\s*=\s*next_state\b/, ex:()=>"Move forward one step: the 'next' state (and action) become the 'current' ones for the next turn of the loop."}
+  ,{re:/policy_stable\s*=\s*True/, concept:"policy_iteration", ex:()=>"Assume the policy is already optimal; if any state's best action changes below, we set this back to False."}
+  ,{re:/return\s+policy_stable/, concept:"policy_iteration", ex:()=>"Report whether the policy stopped changing. True means it is optimal, so policy iteration can stop."}
 ];
 
 /* ---------- Generic Python fallback (only if no strong RL rule matched) ---------- */
@@ -328,17 +343,29 @@ function generic(line){
 }
 
 /* ---------- Syntax highlighter (display only, HTML-escaped) ---------- */
-const KEYWORDS=/\b(def|class|return|if|elif|else|for|while|in|not|and|or|import|from|as|with|break|continue|True|False|None|lambda|is|pass|yield|global)\b/g;
 function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+const _KW=new Set(["def","class","return","if","elif","else","for","while","in","not","and","or","import","from","as","with","break","continue","True","False","None","lambda","is","pass","yield","global"]);
 function highlight(line){
-  let s=esc(line);
-  const parts=s.split(/(#.*$)/);           // split off trailing comment
-  let head=parts[0], com=parts[1]||"";
-  head=head.replace(/(&quot;|&#39;|'|")(?:\\.|(?!\1).)*\1/g,m=>`<span class="tok-str">${m}</span>`);
-  head=head.replace(/\b(\d+\.?\d*(e-?\d+)?)\b/g,'<span class="tok-num">$1</span>');
-  head=head.replace(KEYWORDS,'<span class="tok-kw">$1</span>');
-  head=head.replace(/\b([a-zA-Z_]\w*)(\s*\()/g,'<span class="tok-fn">$1</span>$2');
-  return head + (com?`<span class="tok-com">${com}</span>`:"");
+  // Single-pass tokenizer: every character is emitted exactly once, so inserted
+  // markup is never re-scanned (fixes the class="..." corruption bug).
+  const re=/(#.*$)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|(\b\d+\.?\d*(?:e-?\d+)?\b)|([A-Za-z_]\w*)/g;
+  let out="",last=0,m;
+  while((m=re.exec(line))){
+    out+=esc(line.slice(last,m.index));
+    const full=m[0],com=m[1],str=m[2],num=m[3],word=m[4];
+    if(com) out+='<span class="tok-com">'+esc(com)+'</span>';
+    else if(str) out+='<span class="tok-str">'+esc(str)+'</span>';
+    else if(num) out+='<span class="tok-num">'+esc(num)+'</span>';
+    else if(word){
+      const after=line[m.index+full.length];
+      if(_KW.has(word)) out+='<span class="tok-kw">'+esc(word)+'</span>';
+      else if(after==='(') out+='<span class="tok-fn">'+esc(word)+'</span>';
+      else out+=esc(word);
+    }
+    last=m.index+full.length;
+  }
+  out+=esc(line.slice(last));
+  return out;
 }
 
 /* ---------- Analyzer ---------- */
@@ -353,8 +380,7 @@ function analyze(code){
       for(const rule of RULES){
         if(rule.re.test(line)){
           exps.push(rule.ex(line));
-          tags.add(rule.concept);
-          detected.add(rule.concept);
+          if(rule.concept){ tags.add(rule.concept); detected.add(rule.concept); }
         }
       }
     }
