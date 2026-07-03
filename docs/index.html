@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RL Code Explainer — explain any reinforcement-learning code</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#171d2b; --panel2:#1e2637; --edge:#2b3346;
+    --ink:#e7ecf5; --muted:#9aa7bd; --accent:#4ea1ff; --accent2:#7be0c0;
+    --warn:#ffcf6b; --kw:#c792ea; --fn:#82aaff; --str:#c3e88d; --num:#f78c6c; --com:#5f6b83;
+    --chip:#243049;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--ink);line-height:1.5}
+  header{padding:22px 26px;border-bottom:1px solid var(--edge);background:linear-gradient(180deg,#141a28,#0f1420)}
+  header h1{margin:0;font-size:20px;letter-spacing:.2px}
+  header p{margin:6px 0 0;color:var(--muted);font-size:13.5px;max-width:820px}
+  .wrap{display:grid;grid-template-columns:minmax(320px,42%) 1fr;gap:0;min-height:calc(100vh - 84px)}
+  @media(max-width:900px){.wrap{grid-template-columns:1fr}}
+  .left{border-right:1px solid var(--edge);padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+  .right{padding:18px 22px;min-width:0;overflow-x:hidden}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+  select,button{font:inherit}
+  select{background:var(--panel2);color:var(--ink);border:1px solid var(--edge);border-radius:8px;padding:8px 10px}
+  textarea{width:100%;min-height:340px;flex:1;resize:vertical;background:#0c1119;color:#e7ecf5;
+           border:1px solid var(--edge);border-radius:10px;padding:14px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+           font-size:13px;line-height:1.55;tab-size:4}
+  button.primary{background:var(--accent);color:#06101f;border:0;border-radius:9px;padding:11px 18px;font-weight:650;cursor:pointer}
+  button.primary:hover{filter:brightness(1.07)}
+  button.ghost{background:var(--panel2);color:var(--ink);border:1px solid var(--edge);border-radius:9px;padding:9px 14px;cursor:pointer}
+  button.ghost:hover{border-color:var(--accent)}
+  .hint{font-size:12px;color:var(--muted)}
+  .summary{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:16px 18px;margin-bottom:16px}
+  .summary h2{margin:0 0 6px;font-size:16px}
+  .algo{font-size:14px;color:var(--accent2);font-weight:650}
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+  .chip{background:var(--chip);border:1px solid var(--edge);color:#cfe0ff;font-size:12px;padding:4px 9px;border-radius:999px;cursor:pointer}
+  .chip:hover{border-color:var(--accent)}
+  .sec-title{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin:20px 0 8px}
+  .lines{border:1px solid var(--edge);border-radius:12px;overflow:hidden}
+  .ln{display:grid;grid-template-columns:44px 1fr;border-top:1px solid var(--edge)}
+  .ln:first-child{border-top:0}
+  .ln .no{background:#0c1119;color:#586179;text-align:right;padding:9px 8px;font-family:ui-monospace,monospace;font-size:12px;user-select:none}
+  .ln .body{padding:0;min-width:0}
+  .ln .code{padding:9px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;white-space:pre-wrap;word-break:break-word;background:#0e1420}
+  .ln .exp{padding:8px 12px 11px;font-size:13px;color:#d3ddef;background:var(--panel);border-top:1px dashed var(--edge)}
+  .ln.blank .code{opacity:.5}
+  .ln .exp.none{color:var(--muted);font-style:italic}
+  .tags{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
+  .tag{font-size:11px;padding:2px 7px;border-radius:6px;background:#20304a;color:#a9c6ff;border:1px solid #2c3f5e}
+  .glossary{display:grid;gap:12px}
+  .card{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:14px 16px}
+  .card h3{margin:0 0 6px;font-size:14.5px;color:#eaf1ff}
+  .card p{margin:6px 0;font-size:13px;color:#d3ddef}
+  .formula{font-family:ui-monospace,monospace;font-size:12.5px;background:#0c1119;border:1px solid var(--edge);
+           border-radius:8px;padding:9px 11px;color:#bfe3ff;overflow-x:auto;white-space:pre}
+  .empty{color:var(--muted);font-size:14px;padding:30px 6px}
+  .tok-kw{color:var(--kw)} .tok-fn{color:var(--fn)} .tok-str{color:var(--str)}
+  .tok-num{color:var(--num)} .tok-com{color:var(--com);font-style:italic}
+  footer{color:var(--muted);font-size:12px;padding:14px 22px;border-top:1px solid var(--edge)}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <h1>🧊 RL Code Explainer</h1>
+  <p>Paste a reinforcement-learning code snippet (Gymnasium, ε-greedy, SARSA, Q-learning, value iteration,
+     DQN, REINFORCE, …). The app detects the algorithm, annotates every line, and explains the RL concepts it finds —
+     entirely in your browser, no server or API key. Part of the
+     <a href="https://github.com/mlnjsh/rl-basics" target="_blank" rel="noopener">rl-basics</a> course.</p>
+</header>
+
+<div class="wrap">
+  <div class="left">
+    <div class="row" style="justify-content:space-between">
+      <label>Your code</label>
+      <div class="row">
+        <label for="sample">Load sample</label>
+        <select id="sample">
+          <option value="">— choose —</option>
+          <option value="sarsa">SARSA update</option>
+          <option value="qlearning">Q-learning update</option>
+          <option value="epsilon">ε-greedy + decay</option>
+          <option value="vi">Value iteration (slippery MDP)</option>
+          <option value="dqn">DQN (PyTorch)</option>
+        </select>
+      </div>
+    </div>
+    <textarea id="code" spellcheck="false" placeholder="# paste RL code here, then press Explain"></textarea>
+    <div class="row">
+      <button class="primary" id="explainBtn">Explain code ▸</button>
+      <button class="ghost" id="clearBtn">Clear</button>
+      <span class="hint" id="stat"></span>
+    </div>
+  </div>
+
+  <div class="right" id="out">
+    <div class="empty">Your explanation will appear here. Try “Load sample → SARSA update”, then press <b>Explain code</b>.</div>
+  </div>
+</div>
+
+<footer>Runs 100% offline in your browser · pattern-based static analysis · <span id="ver"></span></footer>
+
+<script>
+/* ============================================================================
+   RL Code Explainer — offline, pattern-based analyzer.
+   No external libraries, no network. All logic below.
+   ============================================================================ */
+
+/* ---------- Sample snippets (from the rl-basics course) ---------- */
+const SAMPLES = {
+sarsa:
+`import numpy as np
+
+def epsilon_greedy(Q, state, epsilon, n_actions):
+    if np.random.random() < epsilon:
+        return np.random.randint(n_actions)
+    return int(np.argmax(Q[state]))
+
+def sarsa(env, n_episodes, alpha=0.1, gamma=0.99, epsilon=0.1):
+    Q = np.zeros((env.observation_space.n, env.action_space.n))
+    for episode in range(n_episodes):
+        state, _ = env.reset()
+        action = epsilon_greedy(Q, state, epsilon, env.action_space.n)
+        done = False
+        while not done:
+            next_state, reward, terminated, truncated, _ = env.step(action)
+            done = terminated or truncated
+            next_action = epsilon_greedy(Q, next_state, epsilon, env.action_space.n)
+            target = reward + gamma * Q[next_state, next_action] * (not done)
+            Q[state, action] += alpha * (target - Q[state, action])
+            state, action = next_state, next_action
+    return Q`,
+qlearning:
+`for episode in range(n_episodes):
+    state, _ = env.reset()
+    done = False
+    while not done:
+        action = epsilon_greedy(Q, state, epsilon, n_actions)
+        next_state, reward, terminated, truncated, _ = env.step(action)
+        done = terminated or truncated
+        # Q-learning bootstraps off the BEST next action (off-policy)
+        td_target = reward + gamma * np.max(Q[next_state]) * (not done)
+        Q[state, action] += alpha * (td_target - Q[state, action])
+        state = next_state`,
+epsilon:
+`def epsilon_schedule(episode, n_episodes, eps_start=1.0, eps_end=0.01):
+    frac = 1.0 - episode / n_episodes
+    return max(eps_end, eps_start * frac)
+
+for episode in range(n_episodes):
+    epsilon = epsilon_schedule(episode, n_episodes)
+    if np.random.random() < epsilon:
+        action = np.random.randint(n_actions)   # explore
+    else:
+        action = int(np.argmax(Q[state]))        # exploit`,
+vi:
+`import gymnasium as gym
+import numpy as np
+
+env = gym.make("FrozenLake-v1", is_slippery=True)
+P = env.unwrapped.P
+n_states, n_actions = env.observation_space.n, env.action_space.n
+
+def value_iteration(gamma=0.99, theta=1e-9):
+    V = np.zeros(n_states)
+    while True:
+        delta = 0.0
+        for s in range(n_states):
+            q = [sum(p * (r + gamma * V[ns] * (not term)) for p, ns, r, term in P[s][a])
+                 for a in range(n_actions)]
+            best = max(q)
+            delta = max(delta, abs(best - V[s]))
+            V[s] = best
+        if delta < theta:
+            break
+    return V`,
+dqn:
+`import torch
+import torch.nn as nn
+
+class QNetwork(nn.Module):
+    def __init__(self, obs_dim, n_actions):
+        super().__init__()
+        self.net = nn.Sequential(nn.Linear(obs_dim, 128), nn.ReLU(), nn.Linear(128, n_actions))
+    def forward(self, x):
+        return self.net(x)
+
+states, actions, rewards, next_states, dones = replay_buffer.sample(batch_size)
+q_values = q_net(states).gather(1, actions)
+with torch.no_grad():
+    next_q = target_net(next_states).max(dim=1, keepdim=True)[0]
+    td_target = rewards + gamma * next_q * (1 - dones)
+loss = nn.functional.mse_loss(q_values, td_target)
+optimizer.zero_grad()
+loss.backward()
+optimizer.step()`
+};
+
+/* ---------- RL concept knowledge base (glossary) ---------- */
+const CONCEPTS = {
+  environment:{title:"The environment (Gymnasium API)",
+    body:["An RL <b>environment</b> is the world the agent acts in. Gymnasium's standard loop is: <code>reset()</code> to start an episode, then repeated <code>step(action)</code> calls.",
+          "<code>reset()</code> returns <code>(observation, info)</code>. <code>step(action)</code> returns <code>(next_state, reward, terminated, truncated, info)</code> — <code>terminated</code> means a real end (goal/hole), <code>truncated</code> means a time limit was hit."],
+    formula:"state, info = env.reset()\nnext_state, reward, terminated, truncated, info = env.step(action)"},
+  spaces:{title:"State & action spaces",
+    body:["<code>observation_space</code> and <code>action_space</code> describe what states and actions look like. For discrete spaces, <code>.n</code> is the count and <code>.sample()</code> draws one at random.",
+          "On Frozen Lake this is <code>16</code> states and <code>4</code> actions (0=Left, 1=Down, 2=Right, 3=Up)."],
+    formula:"n_states  = env.observation_space.n\nn_actions = env.action_space.n"},
+  transition_model:{title:"Transition model  P(s' | s, a)",
+    body:["<code>env.unwrapped.P[s][a]</code> exposes the MDP's dynamics as a list of <code>(probability, next_state, reward, terminated)</code> tuples.",
+          "On slippery Frozen Lake the intended move happens with probability 1/3 and each perpendicular move with probability 1/3 — which is why planning must average over outcomes."],
+    formula:"P[s][a] = [(prob, next_state, reward, terminated), ...]"},
+  epsilon_greedy:{title:"ε-greedy policy (explore vs exploit)",
+    body:["Balances <b>exploration</b> and <b>exploitation</b>: with probability ε take a random action (explore); otherwise take the greedy action <code>argmax Q(s,·)</code> (exploit).",
+          "ε=1 is a pure random walk; ε=0 is fully greedy."],
+    formula:"a = random action           with prob. ε\na = argmax_a Q(s, a)        with prob. 1 − ε"},
+  epsilon_decay:{title:"ε decay over time",
+    body:["A fixed ε is one compromise for the whole run. Decaying ε explores a lot early (when estimates are poor) and exploits later (when they are good) — 'explore early, exploit late'."],
+    formula:"ε(t) = max(ε_end, ε_start · (1 − t / N))"},
+  sarsa:{title:"SARSA update (on-policy TD control)",
+    body:["SARSA updates Q toward the value of the action the policy <i>actually</i> takes next (<code>next_action</code>). Because the target uses the ε-greedy next action, SARSA is <b>on-policy</b>.",
+          "The name is the 5-tuple it uses: State, Action, Reward, next State, next Action."],
+    formula:"Q(s,a) ← Q(s,a) + α · [ r + γ·Q(s',a') − Q(s,a) ]"},
+  qlearning:{title:"Q-learning update (off-policy TD control)",
+    body:["Q-learning bootstraps off the <b>best</b> next action (<code>max_a' Q(s',a')</code>), regardless of what the behaviour policy does next. That makes it <b>off-policy</b> — it learns the greedy/optimal value while still exploring."],
+    formula:"Q(s,a) ← Q(s,a) + α · [ r + γ·max_a' Q(s',a') − Q(s,a) ]"},
+  td_target:{title:"TD target & TD error",
+    body:["The <b>TD target</b> <code>r + γ·V(s')</code> is a one-step estimate of the return that bootstraps off the current value of the next state. The <b>TD error</b> δ is the gap between that target and the current estimate — the signal that drives learning.",
+          "The <code>(not done)</code> / <code>(1 − done)</code> factor zeroes the future term at terminal states, since nothing comes after them."],
+    formula:"target = r + γ·V(s')·(not done)\nδ = target − V(s)"},
+  discount:{title:"Discount factor γ",
+    body:["γ ∈ [0,1) weights future rewards. γ near 1 makes the agent far-sighted (a distant reward still matters); γ near 0 makes it myopic. It also keeps infinite-horizon returns finite."],
+    formula:"G_t = r_t + γ·r_{t+1} + γ²·r_{t+2} + ..."},
+  learning_rate:{title:"Learning rate α",
+    body:["α is the step size: how far each update moves the estimate toward the TD target. Large α learns fast but is noisy on stochastic problems; small α is stable but slow."],
+    formula:"new = old + α · (target − old)"},
+  value_iteration:{title:"Value iteration (Bellman optimality)",
+    body:["A <b>planning</b> method used when the model P is known. It repeatedly applies the Bellman optimality backup until V converges, then reads off the greedy policy. No trial-and-error needed.",
+          "The inner sum over outcomes is exactly the transition model P[s][a]."],
+    formula:"V*(s) = max_a Σ_s' P(s'|s,a) · [ r + γ·V*(s') ]"},
+  monte_carlo:{title:"Monte Carlo returns",
+    body:["Monte Carlo methods wait until an episode ends and use the <i>actual</i> observed return G (no bootstrapping) to update estimates. Unbiased but higher variance than TD."],
+    formula:"G = Σ_{k=0}^{T} γ^k · r_{t+k+1}"},
+  episode_loop:{title:"Episode / step loops",
+    body:["<code>for episode in range(N)</code> repeats whole episodes; the inner <code>while not done</code> steps through one episode until a terminal or truncation. This nested structure is the skeleton of nearly every tabular RL algorithm."],
+    formula:null},
+  dqn:{title:"Deep Q-Network (DQN)",
+    body:["Replaces the Q-table with a neural network Q(s,·;θ). Trained by minimizing the squared TD error against a target computed with a slowly-updated <b>target network</b>, on minibatches drawn from a <b>replay buffer</b>.",
+          "<code>torch.no_grad()</code> around the target prevents gradients from flowing through it."],
+    formula:"L(θ) = ( r + γ·max_a' Q(s',a'; θ⁻) − Q(s,a; θ) )²"},
+  replay_buffer:{title:"Experience replay",
+    body:["Past transitions <code>(s, a, r, s', done)</code> are stored and sampled at random for training. This breaks the correlation between consecutive samples and reuses data, greatly stabilizing deep RL."],
+    formula:null},
+  target_network:{title:"Target network",
+    body:["A periodically-frozen copy of the Q-network (θ⁻) used to compute TD targets. Holding the target fixed for a while stops the network from 'chasing its own tail' and diverging."],
+    formula:null},
+  policy_gradient:{title:"Policy gradient / REINFORCE",
+    body:["Instead of values, learn the policy π(a|s;θ) directly. REINFORCE pushes up the log-probability of actions that led to high return G.",
+          "The loss is the negative of the score-function objective, so gradient descent performs gradient ascent on expected return."],
+    formula:"∇J(θ) = E[ ∇ log π(a|s;θ) · G ]"},
+  actor_critic:{title:"Actor–Critic / advantage",
+    body:["Combines a policy (<b>actor</b>) with a value estimate (<b>critic</b>). The critic supplies a baseline so the actor is updated by the <b>advantage</b> A = Q − V, which lowers variance versus raw returns."],
+    formula:"A(s,a) = Q(s,a) − V(s)"},
+  neural_net:{title:"Neural network (PyTorch)",
+    body:["<code>nn.Module</code> subclasses define a network; <code>forward()</code> is the forward pass. <code>nn.Linear</code> is a fully-connected layer, <code>ReLU</code> a nonlinearity. Training uses <code>loss.backward()</code> (autograd) then <code>optimizer.step()</code>."],
+    formula:null}
+};
+
+/* ---------- Line-classification rules ----------
+   Each rule: {re, concept, explain}. A line collects every strong match.
+   Order = specific RL patterns first. ---------- */
+const RULES = [
+  // Environment lifecycle
+  {re:/\b(gym|gymnasium)\.make\s*\(/, concept:"environment", ex:l=>{
+     const id=(l.match(/make\(\s*["']([^"']+)["']/)||[])[1];
+     const slip=/is_slippery\s*=\s*True/.test(l)?" with slippery (stochastic) ice":/is_slippery\s*=\s*False/.test(l)?" with firm (deterministic) ice":"";
+     return `Creates the environment${id?` <b>${id}</b>`:""}${slip}. This object holds the MDP the agent interacts with.`;}},
+  {re:/\.reset\s*\(/, concept:"environment", ex:()=>"Starts a new episode and returns the initial <code>(observation, info)</code>. Call this before stepping."},
+  {re:/\.step\s*\(/, concept:"environment", ex:()=>"Takes one action in the environment. Returns <code>(next_state, reward, terminated, truncated, info)</code> — the core RL transition."},
+  {re:/\.render\s*\(/, concept:"environment", ex:()=>"Renders the current state (e.g. an RGB frame) so you can visualize what the agent is doing."},
+  {re:/unwrapped\.P\b|\benv\.P\b/, concept:"transition_model", ex:()=>"Accesses the exact transition model <code>P[s][a] = [(prob, next_state, reward, done), ...]</code>. Available because Frozen Lake's dynamics are known — this is what makes <i>planning</i> possible."},
+  {re:/observation_space|action_space/, concept:"spaces", ex:l=>{
+     let s="Refers to the state/action spaces. ";
+     if(/action_space\.n|observation_space\.n/.test(l)) s+="<code>.n</code> gives the number of discrete states/actions. ";
+     if(/action_space\.sample\(/.test(l)) s+="<code>.sample()</code> draws a uniformly-random legal action (used by a random policy). ";
+     return s.trim();}},
+  {re:/is_slippery/, concept:"transition_model", ex:()=>"The <code>is_slippery</code> flag switches Frozen Lake between deterministic (False) and stochastic (True) transitions — the single change that makes the MDP hard."},
+
+  // Exploration
+  {re:/def\s+epsilon_greedy|epsilon_greedy\s*\(/, concept:"epsilon_greedy", ex:l=>/def\s+epsilon_greedy/.test(l)
+     ? "Defines the <b>ε-greedy</b> behaviour policy: the rule that trades exploration against exploitation."
+     : "Calls the ε-greedy policy to choose an action — random with probability ε, greedy otherwise."},
+  {re:/np\.random\.(random|rand|uniform)\s*\([^)]*\)\s*<\s*(epsilon|eps)/, concept:"epsilon_greedy", ex:()=>"The <b>explore</b> branch: with probability ε this condition is true, so a random action will be taken."},
+  {re:/np\.random\.(randint|choice)\s*\(/, concept:"epsilon_greedy", ex:()=>"Picks a random action — the exploration move of an ε-greedy policy."},
+  {re:/\bnp\.argmax\s*\(\s*Q\b|\bargmax\s*\(\s*Q\b/, concept:"epsilon_greedy", ex:()=>"The <b>exploit</b> move: choose the action with the highest current Q-value (the greedy action)."},
+  {re:/def\s+epsilon_schedule|epsilon_schedule\s*\(|eps_start|eps_end|epsilon_end|epsilon_start/, concept:"epsilon_decay", ex:()=>"Computes a <b>decaying ε</b>: exploration high early, annealed toward a small floor later ('explore early, exploit late')."},
+
+  // TD updates — order matters: detect max (Q-learning) before generic SARSA
+  {re:/Q\[[^\]]+\]\s*\+=\s*.*np\.max\s*\(\s*Q\[|np\.max\s*\(\s*Q\[[^\]]*\]\s*\)/, concept:"qlearning", ex:()=>"<b>Q-learning</b> target: it bootstraps off <code>max_a' Q(s',a')</code>, the value of the <i>best</i> next action. Using the max (not the action actually taken) is what makes Q-learning <b>off-policy</b>."},
+  {re:/Q\[[^\]]+\]\s*\+=\s*(alpha|lr)/, concept:"sarsa", ex:l=>/next_action|a_next|Q\[[^\]]*,\s*next/.test(l)
+     ? "The <b>SARSA</b> TD update: moves Q(s,a) toward <code>r + γ·Q(s',a')</code> using the action the policy actually takes next (on-policy)."
+     : "A temporal-difference <b>Q-update</b>: nudges Q(s,a) by α times the TD error toward its target."},
+  {re:/(td_target|target)\s*=\s*.*reward.*gamma|reward\s*\+\s*gamma\s*\*/, concept:"td_target", ex:()=>"Builds the <b>TD target</b> <code>r + γ·(value of next state)</code>. The trailing <code>(not done)</code>/<code>(1 - done)</code> zeroes the future at terminal states."},
+  {re:/next_action|a_next/, concept:"sarsa", ex:()=>"Selects the <i>next</i> action with the same policy — the extra 'A' in SARSA that makes its update on-policy."},
+
+  // Planning / value iteration
+  {re:/def\s+value_iteration|value_iteration\s*\(/, concept:"value_iteration", ex:()=>"Defines <b>value iteration</b>: repeatedly apply the Bellman optimality backup until values converge, then extract the greedy policy."},
+  {re:/for\s+.*\bin\s+range\(\s*n_actions|max\s*\(\s*q\s*\)|best\s*=\s*max/, concept:"value_iteration", ex:()=>"Bellman optimality backup: take the <b>max over actions</b> of the expected return — the best you can do from this state."},
+  {re:/sum\s*\(\s*p\s*\*|for\s+p\s*,\s*ns\s*,\s*r\s*,\s*term\s+in|for\s+prob\s*,/, concept:"value_iteration", ex:()=>"Averages over the transition model's outcomes: Σ P(s'|s,a)·[r + γ·V(s')]. This expectation is why stochastic MDPs need the full model."},
+  {re:/\bdelta\b\s*=|abs\(\s*best\s*-|theta\b/, concept:"value_iteration", ex:()=>"Convergence check: track the largest value change (<code>delta</code>) and stop when it falls below a tiny threshold <code>theta</code>."},
+
+  // Deep RL (torch)
+  {re:/import\s+torch|torch\.nn|from\s+torch/, concept:"neural_net", ex:()=>"Imports PyTorch — signals a <b>deep</b> RL method that approximates values or policies with a neural network."},
+  {re:/class\s+\w+\s*\(\s*nn\.Module/, concept:"neural_net", ex:()=>"Defines a neural network by subclassing <code>nn.Module</code>. In deep RL this typically approximates Q(s,·) or the policy π(a|s)."},
+  {re:/nn\.Linear|nn\.Sequential|nn\.ReLU|def\s+forward/, concept:"neural_net", ex:()=>"Network architecture / forward pass: fully-connected layers and nonlinearities that map a state to Q-values or action probabilities."},
+  {re:/replay_buffer|replay\.|buffer\.(sample|push|add)/, concept:"replay_buffer", ex:()=>"<b>Experience replay</b>: sample past transitions at random to decorrelate updates and reuse data — key to stable DQN."},
+  {re:/target_net|target_network|θ⁻|target_q/, concept:"target_network", ex:()=>"Uses a <b>target network</b> — a frozen copy of the Q-net — to compute stable TD targets."},
+  {re:/torch\.no_grad/, concept:"target_network", ex:()=>"Disables gradient tracking while computing the TD target, so gradients don't flow through the target network."},
+  {re:/mse_loss|MSELoss|loss\s*=/, concept:"dqn", ex:()=>"The DQN loss: mean-squared TD error between predicted Q and the (bootstrapped) target."},
+  {re:/\.backward\(\)|optimizer\.(step|zero_grad)/, concept:"neural_net", ex:()=>"Standard training step: backpropagate the loss (<code>backward()</code>) and update weights (<code>optimizer.step()</code>)."},
+  {re:/\.gather\s*\(|\.max\s*\(\s*dim/, concept:"dqn", ex:()=>"Tensor indexing over the batch: <code>gather</code> picks the Q of the taken action; <code>max(dim=1)</code> gets the best next-action value."},
+
+  // Policy gradient
+  {re:/log_prob|Categorical|F\.softmax|torch\.softmax/, concept:"policy_gradient", ex:()=>"Policy-gradient machinery: a probability distribution over actions and its log-probability, used to push up good actions (REINFORCE)."},
+  {re:/-\s*log_prob\s*\*|loss\s*=\s*-|returns?\b.*\*/, concept:"policy_gradient", ex:()=>"REINFORCE objective: scale the negative log-probability by the return G so likely-good actions become more probable."},
+  {re:/advantage|A\s*=\s*Q|critic|actor/, concept:"actor_critic", ex:()=>"Actor–critic signal: uses an advantage (Q − V) baseline from a critic to reduce the variance of the policy update."},
+
+  // Discount / rates / returns
+  {re:/\bgamma\b/, concept:"discount", ex:()=>"<b>γ (discount factor)</b>: weights future rewards; near 1 = far-sighted, near 0 = myopic."},
+  {re:/\balpha\b|\blr\b|learning_rate/, concept:"learning_rate", ex:()=>"<b>α (learning rate)</b>: the step size of each update toward the target."},
+  {re:/\bG\b\s*=|return_\b|discounted.*return|\bG\s*\+=/, concept:"monte_carlo", ex:()=>"Accumulates the <b>return</b> G (sum of discounted rewards) — a Monte Carlo signal when computed from a full episode."},
+
+  // Loops
+  {re:/for\s+episode\s+in\s+range|for\s+.*\bin\s+range\(\s*n_episodes/, concept:"episode_loop", ex:()=>"Outer training loop: repeat for many <b>episodes</b>. More episodes = more experience to learn from."},
+  {re:/while\s+not\s+done|while\s+True\s*:/, concept:"episode_loop", ex:()=>"Inner loop: keep <b>stepping</b> through the episode until a terminal/truncation (or convergence) breaks it."},
+  {re:/done\s*=\s*terminated\s+or\s+truncated/, concept:"environment", ex:()=>"Combines the two end conditions: <code>terminated</code> (goal/hole) or <code>truncated</code> (time limit) ends the episode."}
+];
+
+/* ---------- Generic Python fallback (only if no strong RL rule matched) ---------- */
+function generic(line){
+  const t=line.trim();
+  if(/^#/.test(t)) return "Comment — a human-readable note, ignored by Python.";
+  if(/^(import|from)\s/.test(t)) return "Imports a library so its functions are available below.";
+  if(/^def\s+\w+/.test(t)){const n=(t.match(/def\s+(\w+)/)||[])[1];return `Defines the function <code>${n}(...)</code>.`;}
+  if(/^class\s+\w+/.test(t)){const n=(t.match(/class\s+(\w+)/)||[])[1];return `Defines the class <code>${n}</code>.`;}
+  if(/^return\b/.test(t)) return "Returns a value from the function to its caller.";
+  if(/^(if|elif)\b/.test(t)) return "Conditional branch — runs the indented block only when the test is true.";
+  if(/^else\s*:/.test(t)) return "The fallback branch when the preceding conditions were false.";
+  if(/^for\s/.test(t)) return "A loop that repeats the indented block over a sequence.";
+  if(/^while\s/.test(t)) return "A loop that repeats the indented block while its condition holds.";
+  if(/^break\b/.test(t)) return "Exits the nearest enclosing loop immediately.";
+  if(/=\s*np\.zeros/.test(t)) return "Allocates a zero-filled array (e.g. a fresh Q-table or value function).";
+  if(/\bprint\s*\(/.test(t)) return "Prints output for inspection.";
+  if(/\bplt\./.test(t)) return "Matplotlib plotting — visualizes values, policies, or learning curves.";
+  if(/^\w[\w\.\[\], ]*\s*=\s*/.test(t)) return "Assignment — computes a value and stores it in a variable.";
+  return null;
+}
+
+/* ---------- Syntax highlighter (display only, HTML-escaped) ---------- */
+const KEYWORDS=/\b(def|class|return|if|elif|else|for|while|in|not|and|or|import|from|as|with|break|continue|True|False|None|lambda|is|pass|yield|global)\b/g;
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function highlight(line){
+  let s=esc(line);
+  const parts=s.split(/(#.*$)/);           // split off trailing comment
+  let head=parts[0], com=parts[1]||"";
+  head=head.replace(/(&quot;|&#39;|'|")(?:\\.|(?!\1).)*\1/g,m=>`<span class="tok-str">${m}</span>`);
+  head=head.replace(/\b(\d+\.?\d*(e-?\d+)?)\b/g,'<span class="tok-num">$1</span>');
+  head=head.replace(KEYWORDS,'<span class="tok-kw">$1</span>');
+  head=head.replace(/\b([a-zA-Z_]\w*)(\s*\()/g,'<span class="tok-fn">$1</span>$2');
+  return head + (com?`<span class="tok-com">${com}</span>`:"");
+}
+
+/* ---------- Analyzer ---------- */
+function analyze(code){
+  const lines=code.replace(/\t/g,"    ").split("\n");
+  const detected=new Set();
+  const out=lines.map((raw,i)=>{
+    const line=raw;
+    const trimmed=line.trim();
+    const exps=[]; const tags=new Set();
+    if(trimmed && !/^#/.test(trimmed)){
+      for(const rule of RULES){
+        if(rule.re.test(line)){
+          exps.push(rule.ex(line));
+          tags.add(rule.concept);
+          detected.add(rule.concept);
+        }
+      }
+    }
+    let text;
+    if(exps.length){ text=[...new Set(exps)].join(" "); }
+    else { text = trimmed ? (generic(line)||"") : ""; }
+    return {n:i+1, code:line, exp:text, tags:[...tags], blank:!trimmed};
+  });
+  return {out, detected:[...detected]};
+}
+
+/* ---------- Algorithm detection (headline) ---------- */
+function detectAlgorithm(code, detected){
+  const has=id=>detected.includes(id);
+  const c=code;
+  if(has("dqn")||/nn\.Module/.test(c)&&/Q/.test(c)) return ["Deep Q-Network (DQN)","A neural network approximates Q-values, trained on replayed transitions against a target network."];
+  if(has("policy_gradient")||has("actor_critic")) return [has("actor_critic")?"Actor–Critic":"Policy Gradient (REINFORCE)","Learns a parameterized policy directly by gradient ascent on expected return."];
+  if(has("qlearning")) return ["Q-learning (off-policy TD control)","Bootstraps off the best next action (max), learning the optimal value while exploring."];
+  if(has("sarsa")) return ["SARSA (on-policy TD control)","Updates toward the value of the action actually taken next under the ε-greedy policy."];
+  if(has("value_iteration")) return ["Value Iteration (dynamic programming)","Planning with a known model: iterate the Bellman optimality backup to the optimal value function."];
+  if(has("epsilon_greedy")||has("epsilon_decay")) return ["ε-greedy exploration","Action-selection strategy balancing exploration and exploitation."];
+  if(has("environment")) return ["Gymnasium environment usage","Interacting with an RL environment via the reset/step API."];
+  if(has("monte_carlo")) return ["Monte Carlo method","Learns from full-episode returns without bootstrapping."];
+  return ["Reinforcement-learning code",""];
+}
+
+/* ---------- Render ---------- */
+function render(code){
+  const out=document.getElementById("out");
+  if(!code.trim()){ out.innerHTML='<div class="empty">Paste some code and press <b>Explain code</b>.</div>'; return; }
+  const {out:lines, detected}=analyze(code);
+  const [algo,algoDesc]=detectAlgorithm(code, detected);
+
+  let html="";
+  // summary
+  html+=`<div class="summary"><h2>Summary</h2><div class="algo">▸ ${algo}</div>`;
+  if(algoDesc) html+=`<p class="hint" style="margin:6px 0 0">${algoDesc}</p>`;
+  if(detected.length){
+    html+=`<div class="chips">`+detected.map(id=>`<span class="chip" data-c="${id}">${(CONCEPTS[id]||{title:id}).title}</span>`).join("")+`</div>`;
+  }
+  html+=`</div>`;
+
+  // line-by-line
+  html+=`<div class="sec-title">Line-by-line</div><div class="lines">`;
+  for(const L of lines){
+    html+=`<div class="ln ${L.blank?'blank':''}"><div class="no">${L.n}</div><div class="body">`;
+    html+=`<div class="code">${highlight(L.code)||"&nbsp;"}</div>`;
+    if(L.exp) html+=`<div class="exp">${L.exp}</div>`;
+    html+=`</div></div>`;
+  }
+  html+=`</div>`;
+
+  // glossary
+  if(detected.length){
+    html+=`<div class="sec-title">Concepts in this snippet</div><div class="glossary">`;
+    for(const id of detected){
+      const c=CONCEPTS[id]; if(!c) continue;
+      html+=`<div class="card" id="c-${id}"><h3>${c.title}</h3>`;
+      html+=c.body.map(p=>`<p>${p}</p>`).join("");
+      if(c.formula) html+=`<div class="formula">${esc(c.formula)}</div>`;
+      html+=`</div>`;
+    }
+    html+=`</div>`;
+  }
+  out.innerHTML=html;
+
+  // chip -> scroll to concept
+  out.querySelectorAll(".chip").forEach(ch=>ch.addEventListener("click",()=>{
+    const el=document.getElementById("c-"+ch.dataset.c);
+    if(el) el.scrollIntoView({behavior:"smooth",block:"center"});
+  }));
+  document.getElementById("stat").textContent=`${lines.length} lines · ${detected.length} concepts detected`;
+}
+
+/* ---------- Wiring ---------- */
+document.getElementById("explainBtn").addEventListener("click",()=>render(document.getElementById("code").value));
+document.getElementById("clearBtn").addEventListener("click",()=>{document.getElementById("code").value="";render("");document.getElementById("stat").textContent="";});
+document.getElementById("sample").addEventListener("change",e=>{
+  const v=e.target.value; if(SAMPLES[v]){document.getElementById("code").value=SAMPLES[v];render(SAMPLES[v]);}
+});
+document.getElementById("ver").textContent="v1.0 · "+new Date().getFullYear();
+</script>
+</body>
+</html>

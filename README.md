@@ -17,6 +17,8 @@ real time. Use it alongside the notebooks to build intuition — adjust paramete
 rate, discount factor, exploration rate ε) and see how the policy and value estimates update
 step by step, then open the matching notebook below to study the code behind it.
 
+**🧩 [RL Code Explainer](https://mlnjsh.github.io/rl-basics/)** — paste any RL code snippet and get an algorithm summary, line-by-line annotations, and a concept glossary, generated entirely in your browser (offline, no API key). Source in [`docs/`](docs/index.html).
+
 ## How the notebooks are organised
 
 - **`envs.py`** — the `Maze` environment (the task every notebook solves).
