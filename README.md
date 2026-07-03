@@ -6,6 +6,10 @@ the same tiny **5×5 Maze** environment so you can *see* what each method learns
 
 > The agent is drawn as a **fuchsia circle**; the goal is the green square.
 
+## 📘 Companion book
+
+**[Aligning Intelligence — a Reinforcement Learning book (PDF)](Aligning_Intelligence_RL_Book.pdf)** — the written companion to these notebooks. [Download / view the PDF](https://github.com/mlnjsh/rl-basics/blob/main/Aligning_Intelligence_RL_Book.pdf).
+
 ## 🎮 Interactive web visualizer
 
 Prefer to *play* with the algorithms before reading the code? Try the companion web app:
