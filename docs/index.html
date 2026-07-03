@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RL Code Explainer — explain any reinforcement-learning code</title>
+<title>Reinforcement Learning — Code Explainer</title>
 <style>
   :root{
     --bg:#0f1420; --panel:#171d2b; --panel2:#1e2637; --edge:#2b3346;
@@ -15,9 +15,19 @@
   html,body{height:100%}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
        background:var(--bg);color:var(--ink);line-height:1.5;height:100vh;display:flex;flex-direction:column;overflow:hidden}
-  header{flex:0 0 auto;padding:22px 26px;border-bottom:1px solid var(--edge);background:linear-gradient(180deg,#141a28,#0f1420)}
-  header h1{margin:0;font-size:20px;letter-spacing:.2px}
-  header p{margin:6px 0 0;color:var(--muted);font-size:13.5px;max-width:820px}
+  header{flex:0 0 auto;border-bottom:1px solid var(--edge);background:#0f1420}
+  .titlebar{display:flex;align-items:stretch;height:52px;background:linear-gradient(90deg,#2626cf 0%,#3a3ae6 100%);
+            color:#fff;box-shadow:0 1px 0 rgba(255,255,255,.08) inset}
+  .titlebar .badge{display:flex;align-items:center;justify-content:center;min-width:56px;padding:0 14px;
+            background:#12123f;color:#fff;font-weight:800;font-size:19px;letter-spacing:.5px}
+  .titlebar .title{display:flex;align-items:center;padding-left:20px;font-size:21px;font-weight:800;letter-spacing:.3px}
+  .titlebar .author{margin-left:auto;display:flex;align-items:center;padding-right:24px;font-size:16px;font-weight:700;white-space:nowrap}
+  @media(max-width:640px){
+    .titlebar{height:auto;flex-wrap:wrap;padding:0}
+    .titlebar .title{font-size:17px;padding:8px 0 8px 14px}
+    .titlebar .author{width:100%;margin:0;padding:0 14px 8px;font-size:14px}
+  }
+  .subtitle{margin:0;color:var(--muted);font-size:13px;max-width:900px;padding:10px 22px}
   .wrap{display:grid;grid-template-columns:minmax(340px,42%) 1fr;gap:0;flex:1 1 auto;min-height:0;overflow:hidden}
   @media(max-width:900px){
     body{height:auto;overflow:visible}
@@ -72,10 +82,14 @@
 </head>
 <body>
 <header>
-  <h1>🧊 RL Code Explainer</h1>
-  <p>Paste a reinforcement-learning code snippet (Gymnasium, ε-greedy, SARSA, Q-learning, value iteration,
-     DQN, REINFORCE, …). The app detects the algorithm, annotates every line, and explains the RL concepts it finds —
-     entirely in your browser, no server or API key. Part of the
+  <div class="titlebar">
+    <span class="badge">S3</span>
+    <span class="title">Reinforcement&nbsp; Learning</span>
+    <span class="author">Dr. Milan A. Joshi</span>
+  </div>
+  <p class="subtitle">Code Explainer — paste an RL code snippet (Gymnasium, ε-greedy, SARSA, Q-learning,
+     value iteration, DQN, …) to get an algorithm summary, line-by-line notes, and a concept glossary,
+     entirely in your browser. Part of the
      <a href="https://github.com/mlnjsh/rl-basics" target="_blank" rel="noopener">rl-basics</a> course.</p>
 </header>
 
