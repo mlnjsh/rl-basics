@@ -60,3 +60,31 @@ cell pulls `envs.py` / `utils.py` and the pinned `gym` automatically).
 | 9 | Deep Q-Learning (DQN) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/Section_9_deep_q_learning.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/Section_9_deep_q_learning_complete.ipynb) |
 | 10 | REINFORCE (policy gradient) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/Section_10_reinforce_CartPole.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/Section_10_reinforce_CartPole_complete.ipynb) |
 | 11 | Advantage Actor-Critic (A2C) | [![Open In Colab](https://colab.research.google.com/assets/cola
+
+## Frozen Lake track (Gymnasium)
+
+A parallel set of notebooks teaches the same ideas on Gymnasium's built-in
+**`FrozenLake-v1`** grid instead of the custom Maze. These use a separate helper
+module, **`utils_frozenlake.py`**, which every notebook that needs it **downloads
+automatically on Colab** (the first cell runs `wget … utils_frozenlake.py`), so the
+plotting and evaluation helpers work with no manual setup. Just click a badge and *Run all*.
+
+| # | Lesson (Frozen Lake) | Open in Colab |
+|---|----------------------|---------------|
+| 0 | Markov Decision Process — intro | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/MDP_introduction_frozenlake.ipynb) |
+| 1 | RL basics | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/RL_basics_frozenlake.ipynb) |
+| 3 | Value Iteration (DP) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/Section_3_value_iteration_frozenlake.ipynb) |
+| 4 | SARSA | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/Section_4_SARSA_frozenlake.ipynb) |
+| 4 | Q-Learning | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/Section_4_Q_learning_frozenlake.ipynb) |
+| 4 | Exploration & ε-greedy (fixed vs decaying ε) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/Section_4_exploration_epsilon_greedy_frozenlake.ipynb) |
+| — | `utils_frozenlake.py` smoke-test / demo | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/utils_frozenlake_demo.ipynb) |
+
+## Running locally
+
+```bash
+pip install gymnasium==1.3.0 pygame numpy matplotlib seaborn torch tqdm
+jupyter notebook
+```
+
+For the Maze notebooks, keep `envs.py` and `utils.py` beside them; for the Frozen Lake
+notebooks, keep `utils_frozenlake.py` beside them (on Colab it is fetched automatically).
