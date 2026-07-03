@@ -72,6 +72,7 @@ plotting and evaluation helpers work with no manual setup. Just click a badge an
 | # | Lesson (Frozen Lake) | Open in Colab |
 |---|----------------------|---------------|
 | 0 | Markov Decision Process — intro | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/MDP_introduction_frozenlake.ipynb) |
+| 0 | Markov Decision Process — **slippery** (full MDP walkthrough) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/MDP_introduction_frozenlake_slippery.ipynb) |
 | 1 | RL basics | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/RL_basics_frozenlake.ipynb) |
 | 3 | Value Iteration (DP) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/Section_3_value_iteration_frozenlake.ipynb) |
 | 4 | SARSA | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/Section_4_SARSA_frozenlake.ipynb) |
