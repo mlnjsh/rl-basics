@@ -6,6 +6,17 @@ the same tiny **5×5 Maze** environment so you can *see* what each method learns
 
 > The agent is drawn as a **fuchsia circle**; the goal is the green square.
 
+## 🎮 Interactive web visualizer
+
+Prefer to *play* with the algorithms before reading the code? Try the companion web app:
+
+**▶️ [RL Algorithms Interactive Visualizer](https://reinforcement-learning-visualizer.replit.app/)**
+
+A browser-based, no-install tool for watching reinforcement-learning algorithms learn in
+real time. Use it alongside the notebooks to build intuition — adjust parameters (learning
+rate, discount factor, exploration rate ε) and see how the policy and value estimates update
+step by step, then open the matching notebook below to study the code behind it.
+
 ## How the notebooks are organised
 
 - **`envs.py`** — the `Maze` environment (the task every notebook solves).
@@ -48,14 +59,4 @@ cell pulls `envs.py` / `utils.py` and the pinned `gym` automatically).
 | 8 | Deep SARSA | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/Section_8_deep_sarsa.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/Section_8_deep_sarsa_complete.ipynb) |
 | 9 | Deep Q-Learning (DQN) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/Section_9_deep_q_learning.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/Section_9_deep_q_learning_complete.ipynb) |
 | 10 | REINFORCE (policy gradient) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/Section_10_reinforce_CartPole.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/Section_10_reinforce_CartPole_complete.ipynb) |
-| 11 | Advantage Actor-Critic (A2C) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/Section_11_advantage_actor_critic.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mlnjsh/rl-basics/blob/main/Section_11_advantage_actor_critic_complete.ipynb) |
-
-## Running locally
-
-```bash
-pip install gym==0.23.0 pygame numpy matplotlib seaborn torch tqdm
-jupyter notebook
-```
-
-With `envs.py` and `utils.py` in the same folder as the notebooks, the `from envs import Maze`
-and `from utils import …` lines work out of the box.
+| 11 | Advantage Actor-Critic (A2C) | [![Open In Colab](https://colab.research.google.com/assets/cola
